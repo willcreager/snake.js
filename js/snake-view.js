@@ -33,25 +33,23 @@
   };
 
   View.prototype.render = function () {
-    // simple text based rendering
-    // this.$el.html(this.board.render());
     this.updateClasses(this.board.snake.segments, "snake");
-    this.updateClasses([this.board.apple.position], "apple");
+    this.updateClasses([this.board.mouse.position], "mouse");
   };
 
   View.prototype.updateClasses = function(coords, className) {
     this.$li.filter("." + className).removeClass();
     coords.forEach(function(coord){
-      var flatCoord = (coord.i * this.board.dim) + coord.j;
+      var flatCoord = (coord.x * this.board.dim) + coord.y;
       this.$li.eq(flatCoord).addClass(className);
     }.bind(this));
   };
 
   View.prototype.setupGrid = function () {
     var html = "";
-    for (var i = 0; i < this.board.dim; i++) {
+    for (var x = 0; x < this.board.dim; x++) {
       html += "<ul>";
-      for (var j = 0; j < this.board.dim; j++) {
+      for (var y = 0; y < this.board.dim; y++) {
         html += "<li></li>";
       }
       html += "</ul>";
@@ -64,7 +62,11 @@
   View.prototype.step = function () {
     if (this.board.snake.segments.length > 0) {
       this.board.snake.move();
+      if (this.board.index % 2 === 0) {
+        this.board.mouse.move();
+      }
       this.render();
+      this.board.index += 1;
     } else {
       alert("Sorry, you lost! :(");
       window.clearInterval(this.intervalId);

@@ -21,15 +21,57 @@
   };
 
   var Mouse = SnakeGame.Mouse = function (board) {
+    this.dir = "N";
     this.board = board;
     this.replace();
+  };
+
+  Mouse.DIFFS = {
+    "N": new Coord(-1, 0),
+    "E": new Coord(0, 1),
+    "S": new Coord(1, 0),
+    "W": new Coord(0, -1)
+  };
+
+  Mouse.prototype.move = function () {
+    var newPos = this.position.plus(Mouse.DIFFS[this.dir]);
+    if (this.validPos(newPos)) {
+      if (!newPos.equals(this.board.snake.head().plus(Snake.DIFFS[this.board.snake.dir]))) {
+        this.position = newPos;
+      }
+    }
+    var z = Math.floor(Math.random()*4);
+    if (z===0) {
+      this.dir = "N";
+    } else if (z===1) {
+      this.dir = "W";
+    } else if (z===2) {
+      this.dir = "S";
+    } else {
+      this.dir = "E";
+    }
+  };
+
+  Mouse.prototype.validPos = function (coord) {
+    var result = true
+    if (!this.board.validPosition(coord)) {
+      result = false;
+    } else {
+      this.board.snake.segments.forEach(function (segment) {
+        if (segment.equals(coord)) {
+          result = false;
+          return result;
+        }
+      })
+    }
+    return result;
   };
 
   Mouse.prototype.replace = function () {
     var i = Math.floor(Math.random() * this.board.dim);
     var j = Math.floor(Math.random() * this.board.dim);
-    // Don't place a mouse where there is a snake
-    while (this.board.snake.isOccupying([i, j])) {
+    var coord = new Coord(i, j)
+    while (!this.validPos(coord)) {
       i = Math.floor(Math.random() * this.board.dim);
       j = Math.floor(Math.random() * this.board.dim);
     }
@@ -123,6 +165,7 @@
     this.dim = dim;
     this.snake = new Snake(this);
     this.mouse = new Mouse(this);
+    this.index = 0;
   };
 
   Board.BLANK_SYMBOL = ".";
